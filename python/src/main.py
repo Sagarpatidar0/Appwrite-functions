@@ -2,36 +2,26 @@ from appwrite.client import Client
 import os
 
 
-# This is your Appwrite function
-# It's executed each time we get a request
 def main(context):
-    # Why not try the Appwrite SDK?
-    #
-    # client = (
-    #     Client()
-    #     .set_endpoint("https://cloud.appwrite.io/v1")
-    #     .set_project(os.environ["APPWRITE_FUNCTION_PROJECT_ID"])
-    #     .set_key(os.environ["APPWRITE_API_KEY"])
-    # )
-
-    # You can log messages to the console
-    context.log("Hello, Logs!")
-
-    # If something goes wrong, log an error
-    context.error("Hello, Errors!")
-
-    # The `ctx.req` object contains the request data
     if context.req.method == "GET":
-        # Send a response with the res object helpers
-        # `ctx.res.send()` dispatches a string back to the client
         return context.res.send("Hello, World!")
 
-    # `ctx.res.json()` is a handy helper for sending JSON
-    return context.res.json(
-        {
-            "motto": "Build like a team of hundreds_",
-            "learn": "https://appwrite.io/docs",
-            "connect": "https://appwrite.io/discord",
-            "getInspired": "https://builtwith.appwrite.io",
-        }
-    )
+    
+    code = context.req.body
+    if not code:
+        return context.res.json({"status": "error", "error": "No code provided"})
+
+    output = ""
+    console_output = ""
+
+    
+    try:
+        exec_globals = {}
+        exec_locals = {}
+        exec(code, exec_globals, exec_locals)
+        output = exec_locals.get('output', '')
+        console_output = exec_locals.get('console_output', '')
+    except Exception as e:
+        return context.res.json({"status": "error", "error": str(e), "consoleOutput": console_output})
+
+    return context.res.json({"status": "success", "output": output, "consoleOutput": console_output})
