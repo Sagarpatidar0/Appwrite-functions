@@ -1,5 +1,7 @@
 from appwrite.client import Client
 import os
+import io
+from contextlib import redirect_stdout
 
 
 def main(context):
@@ -11,18 +13,16 @@ def main(context):
     if not code:
         return context.res.json({"status": "error", "error": "No code provided"})
 
-    output = ""
-    console_output = ""
+    out = ""
 
     
     try:
-        exec_globals = {}
-        exec_locals = {}
-        exec(code, exec_globals, exec_locals)
-        context.log(exec_locals);
-        output = exec_locals.get('output', '')
-        console_output = exec_locals.get('console_output', '')
-    except Exception as e:
-        return context.res.json({"status": "error", "error": str(e), "consoleOutput": console_output})
+        stdout = io.StringIO()
+        with redirect_stdout(stdout):
+            exec(func_str)
 
-    return context.res.json({"status": "success", "output": output, "consoleOutput": console_output})
+        out = stdout.getvalue()
+    except Exception as e:
+        return context.res.json({"status": "error", "error": out, "consoleOutput": out})
+
+    return context.res.json({"status": "success", "output": out, "consoleOutput": out})
