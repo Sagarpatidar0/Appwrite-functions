@@ -4,7 +4,7 @@ import os
 
 def main(context):
     if context.req.method == "GET":
-        return context.res.send("Hello, World!")
+        return context.res.send("Hello, Python!")
 
     
     code = context.req.body
@@ -19,6 +19,7 @@ def main(context):
         exec_globals = {}
         exec_locals = {}
         exec(code, exec_globals, exec_locals)
+        context.log(exec_locals);
         output = exec_locals.get('output', '')
         console_output = exec_locals.get('console_output', '')
     except Exception as e:
